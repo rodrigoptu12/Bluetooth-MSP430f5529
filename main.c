@@ -19,6 +19,7 @@ void gpio(void);
 void UART();
 void timers(void);
 void Sensor_Mic(void);
+
 int main(void)
 {
       WDTCTL = WDTPW + WDTHOLD;
@@ -43,37 +44,39 @@ void Sensor_Mic(void){
         if(count == 2){
             count = 0;
             E_TOGGLE;
+            status = (status == 1) ? 0 : 1;
             Estado();
         }
     }
 }
+// Timer
 void timers(void){
-    TA0CCR0 = 65535;
-    TA0CTL = TASSEL_1 + MC__STOP + TACLR;         // ACLK, upmode, clear TAR
+    TA0CCR0 = 65535;                          //2 sec
+    TA0CTL = TASSEL_1 + MC__STOP + TACLR;     // ACLK, upmode, clear TAR
     TA0CCTL0 = CCIE;                          // CCR0 interrupt enabled
 }
 
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void TIMER0_A0_ISR(void)
 {
-  count = 0;                            // Zera o contador de sons
+  count = 0;                                  // Zera o contador de sons
 }
 
 // UART
 void UART(){
-    P3SEL |= BIT3 | BIT4;  // P3.3 - RX and P3.4 - TX
+    P3SEL |= BIT3 | BIT4;                    // P3.3 - RX and P3.4 - TX
     //Desliga o módulo
     UCA0CTL1 |= UCSWRST;
 
     UCA0CTL1 |= UCSSEL_1;
-    UCA0BR0 = 0x03;     // 32,768kHz 9600
+    UCA0BR0 = 0x03;                          // 32,768kHz 9600
     UCA0BR1 = 0x00;
     UCA0MCTL = UCBRS_3 | UCBRF_0;
 
     //Liga o módulo
     UCA0CTL1 &= ~UCSWRST;
 
-    UCA0IE |= UCRXIE;  //Interrupt on Reception
+    UCA0IE |= UCRXIE;                        //Interrupt on Reception
 
 }
 
